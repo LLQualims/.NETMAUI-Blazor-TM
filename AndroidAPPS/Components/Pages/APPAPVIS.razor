@@ -1,32 +1,52 @@
 ﻿@page "/APPAPVIS"
+@using System.Text.Json
+@using TrackMobile.Models
 
-<h1>APPAPVIS</h1>
+<h1 style="text-align: center">Appareils</h1>
+<p style="text-align: center; margin: 10">@MessageStatut</p>
 
-<p>Bienvenue dans votre nouvelle application.</p>
+<button @onclick="rechercherAppareils">Rechercher les appareils</button>
 
-<button id="fetchDataButton">Fetch Data</button>
-<ul id="apiResult"></ul>
-
-<script>
-    document.getElementById('fetchDataButton').addEventListener('click', async () => {
-        const response = await fetch('http://192.168.39.68/8.1b/app/appareil/vis', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJJZCI6ImI2NGQ5N2RkLTE4YTAtNDJkMi1hZTNkLWViM2Q5ZDRlYTQ5MCIsInN1YklkIjoiNzYiLCJzdWIiOiJLUCIsImp0aSI6IjFkZGEyODRmLTZjZTQtNGRlMC04NDEzLTk1NGI2YWI2YWM0MCIsIlByb2ZpbEVRTSI6IjYiLCJQcm9maWxMQUIiOiIxMCIsIm5iZiI6MTcxOTQ5ODE1OSwiZXhwIjoyMDE5NTAxNzU5LCJpYXQiOjE3MTk0OTgxNTksImlzcyI6IklOT0tZIiwiYXVkIjoiUVVBTElNUyJ9.TaF3QoT2AooxmPD6l_vXWFCnKDguU0pGiaGymo4_6mg'
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const apiResultElement = document.getElementById('apiResult');
-            apiResultElement.innerHTML = '';
-            data.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                apiResultElement.appendChild(li);
-            });
-        } else {
-            document.getElementById('apiResult').innerText = 'Erreur lors de la récupération des données.';
+<table class="table">
+    <thead>
+        <tr>
+            <th>Numéro</th>
+            <th>Désignation</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appareil in ListeAppareils)
+        {
+            <tr>
+                <td>@appareil.numeroAppareil</td>
+                <td>@appareil.designationAppareil</td>
+            </tr>
         }
-    });
-</script>
+    </tbody>
+</table>
+
+
+@code {
+    private string MessageStatut;
+    private List<AppareilVis> ListeAppareils = new();
+
+    private async void rechercherAppareils()
+    {
+        MessageStatut = "Chargement ...";
+
+        HttpClient clientHttp = new();
+        clientHttp.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzI1NiJ9.eyJJZCI6ImI2NGQ5N2RkLTE4YTAtNDJkMi1hZTNkLWViM2Q5ZDRlYTQ5MCIsInN1YklkIjoiNzYiLCJzdWIiOiJLUCIsImp0aSI6IjFkZGEyODRmLTZjZTQtNGRlMC04NDEzLTk1NGI2YWI2YWM0MCIsIlByb2ZpbEVRTSI6IjYiLCJQcm9maWxMQUIiOiIxMCIsIm5iZiI6MTcxOTQ5ODE1OSwiZXhwIjoyMDE5NTAxNzU5LCJpYXQiOjE3MTk0OTgxNTksImlzcyI6IklOT0tZIiwiYXVkIjoiUVVBTElNUyJ9.TaF3QoT2AooxmPD6l_vXWFCnKDguU0pGiaGymo4_6mg");
+        try{
+            ReponseAPI reponseAPI = await clientHttp.GetFromJsonAsync<ReponseAPI>("http://192.168.39.67:7002/8.1b/app/appareil/vis");
+            ListeAppareils = JsonSerializer.Deserialize<List<AppareilVis>>(reponseAPI.Contenu);
+            MessageStatut = $"Recherche terminée ({ListeAppareils.Count} appareils)";
+            StateHasChanged();
+        } catch (Exception ex)
+        {
+            MessageStatut = $"Erreur : {ex.Message}";
+        }
+
+        StateHasChanged();
+    }
+
+}

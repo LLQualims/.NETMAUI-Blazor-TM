@@ -1,0 +1,135 @@
+﻿@page "/LARCOVIS"
+@using System.Text.Json
+@using System.Diagnostics
+@using TrackMobile.Models
+
+<h1 style="text-align: center">Conditionnements</h1>
+<p style="text-align: center; margin: 10">@MessageStatut</p>
+
+<p>
+    <label>Zone :</label>
+    <select @bind="zoneSelect">
+        @foreach (var zone in ListeZones)
+        {
+            <option value="@zone.idlabZone">@zone.codeZone</option>
+        }
+    </select>
+</p>
+
+<p>
+    <label>Statut :</label>
+    <select @bind="statutSelect">
+        <option value="0">Tous</option>
+        @foreach (var statutCo in ListeStatutsCO)
+        {
+            <option value="@statutCo.idlarStatutCO">@statutCo.designationStatut</option>
+        }
+    </select>
+</p>
+
+<button @onclick="rechercherConditionnements">Rechercher les conditionnements</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>N° Conditionnement</th>
+            <th>Article</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var conditionnement in ListeConditionnements)
+        {
+            <tr>
+                <!--<td><img src="data:image;base64, conditionnement.image" /></td>-->
+                <td><img src="data:image;base64, @conditionnement.image"></td>
+                <td>@conditionnement.numConditionnement</td>
+                <td>@conditionnement.codeArticle</td>
+                <td>@conditionnement.designationArticle</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    private string MessageStatut;
+    private List<ConditionnementVis> ListeConditionnements = new();
+    private List<LABZone> ListeZones = new();
+    private List<LARStatutCO> ListeStatutsCO = new();
+    private Dictionary<string, string> ImagesStatut = new();
+    private string zoneSelect;
+    private string statutSelect = "0";
+    private HttpClient clientHttp;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientHttp = new();
+        clientHttp.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjZmMDQwMDM0LTM3ODYtNGVlNS05NDEwLWYzZmFmNTdmNjc1NCIsInN1YklkIjoiMzQiLCJzdWIiOiJzZmFicmUiLCJqdGkiOiI5NzMxNGIwMC1lNDliLTRlOGUtOWU2MS00Yzk5ZDdiNDVlMzEiLCJQcm9maWxMQUIiOiIxMSIsIm5iZiI6MTcyMDUzNjY2MCwiZXhwIjozNjEzOTkyNjYwLCJpYXQiOjE3MjA1MzY2NjAsImlzcyI6IklOT0tZIiwiYXVkIjoiUVVBTElNUyJ9.f11uc3wSj9VR3Ifyz8Vr-Le-nm_WtiJ3oL-S5JJZP3LWFfkFs4DAmUakcRuRjckAX9ccK6racp-serRhLPKUZg");
+
+        ReponseAPI reponseAPI = await clientHttp.GetFromJsonAsync<ReponseAPI>("http://192.168.39.67:7000/8.1b/lab/zone");
+        ListeZones = JsonSerializer.Deserialize<List<LABZone>>(reponseAPI.Contenu);
+
+        reponseAPI = await clientHttp.GetFromJsonAsync<ReponseAPI>("http://192.168.39.67:7000/8.1b/lar/statutco");
+        ListeStatutsCO = JsonSerializer.Deserialize<List<LARStatutCO>>(reponseAPI.Contenu);
+
+        StateHasChanged();
+    }
+
+    private async void rechercherConditionnements()
+    {
+        Stopwatch chrono = new Stopwatch();
+        chrono.Start();
+        MessageStatut = "Chargement ...";
+        ListeConditionnements.Clear();
+        StateHasChanged();
+
+        clientHttp.DefaultRequestHeaders.Clear();
+        clientHttp.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjZmMDQwMDM0LTM3ODYtNGVlNS05NDEwLWYzZmFmNTdmNjc1NCIsInN1YklkIjoiMzQiLCJzdWIiOiJzZmFicmUiLCJqdGkiOiI5NzMxNGIwMC1lNDliLTRlOGUtOWU2MS00Yzk5ZDdiNDVlMzEiLCJQcm9maWxMQUIiOiIxMSIsIm5iZiI6MTcyMDUzNjY2MCwiZXhwIjozNjEzOTkyNjYwLCJpYXQiOjE3MjA1MzY2NjAsImlzcyI6IklOT0tZIiwiYXVkIjoiUVVBTElNUyJ9.f11uc3wSj9VR3Ifyz8Vr-Le-nm_WtiJ3oL-S5JJZP3LWFfkFs4DAmUakcRuRjckAX9ccK6racp-serRhLPKUZg");
+        clientHttp.DefaultRequestHeaders.Add("IDLABZone", zoneSelect);
+        if (statutSelect != "0") { clientHttp.DefaultRequestHeaders.Add("IDLARStatutCO", statutSelect); }
+
+        try
+        {
+            ReponseAPI reponseAPI = await clientHttp.GetFromJsonAsync<ReponseAPI>("http://192.168.39.67:7000/8.1b/lar/conditionnement/vis");
+            ListeConditionnements = JsonSerializer.Deserialize<List<ConditionnementVis>>(reponseAPI.Contenu);
+            if (statutSelect != "0") { ListeConditionnements = ListeConditionnements.Where(cond => cond.idlarStatutCO.ToString() == statutSelect).ToList(); }
+
+            // Recherche des images
+            ConditionnementVis condTmp;
+            for (int i = 0; i < ListeConditionnements.Count; i++)
+            {
+                if (ListeConditionnements[i].nomImage == "") { continue; }
+
+                condTmp = ListeConditionnements[i];
+                condTmp.nomImage = condTmp.nomImage.Replace("XX-XX-X.XXX", $"{condTmp.idlarStatutCO}-48-1.png");
+                await GetImageFromNom(condTmp.nomImage);
+                if (ImagesStatut.ContainsKey(condTmp.nomImage)) { condTmp.image = ImagesStatut[condTmp.nomImage]; }
+                ListeConditionnements[i] = condTmp;
+            }
+            chrono.Stop();
+            MessageStatut = $"Recherche de {ListeConditionnements.Count} conditionnements terminée en {chrono.Elapsed}";
+        }
+        catch (Exception ex)
+        {
+            MessageStatut = $"Erreur : {ex.Message}";
+        }
+
+        
+        StateHasChanged();
+    }
+
+    private async Task<string> GetImageFromNom(string nomImage)
+    {
+        if (ImagesStatut.ContainsKey(nomImage)) { return ImagesStatut[nomImage]; }
+
+        ReponseAPI reponseAPI = await clientHttp.GetFromJsonAsync<ReponseAPI>($"http://192.168.39.67:7000/8.1b/ressources/images/base64/{nomImage}");
+
+        ImagesStatut[nomImage] = Convert.ToString(reponseAPI.Contenu);
+        return ImagesStatut[nomImage];
+        //MemoryStream imageDecodeStream = new(imageBytes);
+        //base64DecodedImage.Source = ImageSource.FromStream(() => imageDecodeStream);
+    }
+
+}

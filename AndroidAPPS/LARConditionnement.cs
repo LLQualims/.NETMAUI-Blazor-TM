@@ -1,0 +1,70 @@
+﻿namespace TrackMobile.Models;
+public class LARConditionnement
+{
+    public decimal? IDLARStatutCO { get; set; }
+    public decimal? IDENVConditionnement { get; set; }
+    public DateTime? DateReception { get; set; }
+    public decimal? IDLARPreparation { get; set; }
+    public decimal IDLARConditionnement { get; set; }
+    public string? Reference { get; set; }
+    public string? ReferenceFabricant { get; set; }
+    public decimal? QuantiteRestante { get; set; }
+    public DateTime? DateOuverture { get; set; }
+    public DateTime? DatePeremptionConditionnement { get; set; }
+    public string? Preleveur { get; set; }
+    public decimal? QuantiteConditionnement { get; set; }
+    public decimal? NbreDecimalesStock { get; set; }
+    public string? NumExterne { get; set; }
+    public string? AuditCRE { get; set; }
+    public DateTime? AuditDCRE { get; set; }
+    public string? AuditMOD { get; set; }
+    public DateTime? AuditDMOD { get; set; }
+    public decimal? IDLARLot { get; set; }
+    public decimal? IDEXTTiers { get; set; }
+    public decimal? IDLARCommandeLigne { get; set; }
+    public decimal? IDLARArticle { get; set; }
+    public decimal? IDLABRangement { get; set; }
+    public string? NumConditionnement { get; set; }
+    public decimal? IDLARInventaireLigne { get; set; }
+    public decimal? IDENVUniteStockage { get; set; }
+    public DateTime? DateProchainTest { get; set; }
+    public decimal? IDLARReception { get; set; }
+    public decimal? IDLABReservationLigne { get; set; }
+    public DateTime? DatePeremptionLot { get; set; }
+    public string? EnrARCHIVE { get; set; }
+    public decimal? BoucleConditionnement { get; set; }
+    public decimal? IDLABSousRangement { get; set; }
+    public string? Remarque { get; set; }
+    public decimal? IDLARDomaine { get; set; }
+    public DateTime? DateFutureOperation { get; set; }
+    public DateTime? DateDerniereOperation { get; set; }
+    public byte? SuiviAutomatique { get; set; }
+    public byte? PropagationStatutSalle { get; set; }
+    public byte? PropagationStatutAppareil { get; set; }
+    public string? Champ01 { get; set; }
+    public string? Champ02 { get; set; }
+    public string? Champ03 { get; set; }
+    public string? Champ04 { get; set; }
+    public string? Champ05Specifique { get; set; }
+    public decimal? IDLAREtatCO { get; set; }
+    public decimal? IDLABZone { get; set; }
+    public string? Localisation { get; set; }
+    public DateTime? DateFinUtilisation { get; set; }
+    public string? PosPlaqueX { get; set; }
+    public string? PosPlaqueY { get; set; }
+    public decimal? BoucleConditionnementKit { get; set; }
+    public decimal? IDIndisponibilite { get; set; }
+    public decimal? TitreCourant { get; set; }
+    public decimal? TitreUnite { get; set; }
+    public decimal? TitreNbreDecimales { get; set; }
+    public DateTime? TitreDate { get; set; }
+    public decimal? PrixConditionnement { get; set; }
+    public DateTime? DateRejet { get; set; }
+    public DateTime? DateStockZero { get; set; }
+    public string? Champ06 { get; set; }
+    public byte? ModificationDatePeremption { get; set; }
+    public byte? OperationReconditionnement { get; set; }
+    public decimal? IDFabricant { get; set; }
+
+
+}
